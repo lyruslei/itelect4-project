@@ -1,4 +1,4 @@
-import type { Submission } from "../types/index";
+import type { Submission } from "../../types/index";
 
 interface SubmissionBadgeProps {
   submission: Submission;

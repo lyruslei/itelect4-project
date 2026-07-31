@@ -1,7 +1,7 @@
 import UserCard from "./components/UserCard";
 import CourseCard from "./components/CourseCard";
 import SubmissionBadge from "./components/SubmissionBadge";
-import type { Course, Submission, User } from "./types/index";
+import type { Course, Submission, User } from "../types/index";
 
 const student: User = {
   id: 1,
