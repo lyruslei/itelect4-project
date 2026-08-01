@@ -1,49 +1,75 @@
-# GT1 Part 2 — ITElect4 Project
+# React + TypeScript + Vite
 
-A TypeScript project that models a course submission system with typed users, courses, submissions, and advanced type features.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Project overview
-- Models a simple academic system using TypeScript types and interfaces
-- Includes:
-  - `User`, `Course`, `Submission`
-  - special types: `any`, `unknown`, `never`
-  - generics: `getFirst<T>`, `getById<T>`, `ApiResponse<T>`
-  - utility types: `Partial`, `Pick`, `Omit`, `Record`, `ReturnType`
-  - enums for submission status and user roles
-  - type narrowing, union types, and intersection types
+Currently, two official plugins are available:
 
-## Repository structure
-- `src/index.ts` — main application entry point and examples
-- `types/index.ts` — shared type definitions and interfaces
-- `tsconfig.json` — TypeScript compiler configuration
-- `package.json` — dependency definitions and package metadata
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Prerequisites
-- Node.js
-- npm
+## React Compiler
 
-## Install
-```bash
-cd itelect4-project
-npm install
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+
 ```
 
-## Run
-```bash
-npx ts-node src/index.ts
-```
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-## Type-check
-```bash
-npx tsc --noEmit
-```
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-## Build
-```bash
-npx tsc
-```
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 
-## Notes
-- This project currently uses `ts-node` for direct execution of TypeScript.
-- The `package.json` currently includes development dependencies for `typescript`, `ts-node`, and `@types/node`.
-- Update `src/index.ts` and `types/index.ts` to explore additional TypeScript concepts.
+```

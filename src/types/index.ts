@@ -1,41 +1,46 @@
-// ===== INTERFACES (Part 1) =====
+// ===== ENUMS =====
+export enum ClaimStatus {
+  Pending,
+  Approved,
+  Rejected,
+}
+
+export const enum UserRole {
+  Student = "student",
+  Admin = "admin",
+}
+
+// ===== INTERFACES =====
 export interface User {
   id: number;
   name: string;
   email: string;
-  role: "student" | "admin" | "instructor";
+  role: "student" | "admin";
   isActive: boolean;
 }
 
-export interface Course {
-  code: string;
-  title: string;
-  units: number;
-  semester: string;
-}
-
-export interface Submission {
+export interface Item {
   id: number;
-  studentId: number;
-  courseCode: string;
-  repoUrl: string;
-  submittedAt: Date;
-  score?: number; // optional field
+  title: string;
+  description: string;
+  location: string;
+  status: "lost" | "found" | "claimed";
+  reportedById: number;
+  reportedAt: Date;
 }
 
-// ===== TYPE ALIASES (Part 1) =====
-export type ID = number | string;
-export type Coordinate = { x: number; y: number };
-export type Formatter = (value: number) => string;
+export interface Claim {
+  id: number;
+  itemId: number;
+  claimantId: number;
+  status: ClaimStatus;
+  createdAt: Date;
+  notes?: string;
+}
+
+// ===== TYPE ALIASES & GENERICS =====
 export type StringOrNumber = string | number;
-export type Status = "pending" | "active" | "inactive";
 
-export type StudentWithCourse = User & {
-  enrolledCourse: Course;
-  gpa: number;
-};
-
-// ===== GENERIC INTERFACE =====
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -43,20 +48,21 @@ export interface ApiResponse<T> {
 }
 
 // ===== UTILITY TYPES =====
-export type UserUpdate = Partial<User>;
+export type ItemUpdate = Partial<Item>;
 export type UserPreview = Pick<User, "id" | "name" | "role">;
-export type PublicUser = Omit<User, "email" | "isActive">;
-export type RoleCount = Record<"student" | "admin" | "instructor", number>;
+export type PublicItem = Omit<Item, "reportedById">;
+export type RoleCount = Record<"student" | "admin", number>;
 
-// ===== ENUMS =====
-export enum SubmissionStatus {
-  Pending,
-  Graded,
-  Late,
+// Helper function for ReturnType demonstration
+export function createClaim(itemId: number, claimantId: number, notes?: string) {
+  return {
+    id: Date.now(),
+    itemId,
+    claimantId,
+    status: ClaimStatus.Pending,
+    createdAt: new Date(),
+    notes,
+  };
 }
 
-export const enum Role {
-  Student = "student",
-  Admin = "admin",
-  Instructor = "instructor",
-}
+export type NewClaim = ReturnType<typeof createClaim>;
