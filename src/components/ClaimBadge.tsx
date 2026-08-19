@@ -1,9 +1,9 @@
 import React from "react";
-import type { Claim } from "../types/index";
+import type { ApiClaim } from "../types/index";
 import { ClaimStatus } from "../types/index";
 
 interface ClaimBadgeProps {
-  claim: Claim;
+  claim: ApiClaim;
   children?: React.ReactNode;
 }
 
@@ -26,7 +26,7 @@ const ClaimBadge: React.FC<ClaimBadgeProps> = ({ claim, children }) => {
           <strong className="font-semibold text-gray-800 dark:text-gray-200">Claimant ID:</strong> {claim.claimantId}
         </p>
         <p>
-          <strong className="font-semibold text-gray-800 dark:text-gray-200">Created:</strong> {claim.createdAt.toLocaleDateString()}
+          <strong className="font-semibold text-gray-800 dark:text-gray-200">Created:</strong> {new Date(claim.createdAt).toLocaleDateString()}
         </p>
         <p>
           <strong className="font-semibold text-gray-800 dark:text-gray-200">Notes:</strong> {claim.notes ?? "No notes provided"}
