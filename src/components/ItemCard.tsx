@@ -1,7 +1,7 @@
-import type { Item } from "../types/index";
+import type { ApiItem } from "../types/index";
 
 interface ItemCardProps {
-  item: Item;
+  item: ApiItem;
   variant?: "default" | "compact";
 }
 
@@ -39,7 +39,7 @@ function ItemCard({ item, variant = "default" }: ItemCardProps) {
       {!isCompact && (
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
           <strong className="font-semibold text-gray-700 dark:text-gray-300">Reported:</strong>{" "}
-          {item.reportedAt.toLocaleDateString()}
+          {new Date(item.reportedAt).toLocaleDateString()}
         </p>
       )}
     </div>

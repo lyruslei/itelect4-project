@@ -66,3 +66,18 @@ export function createClaim(itemId: number, claimantId: number, notes?: string) 
 }
 
 export type NewClaim = ReturnType<typeof createClaim>;
+
+// ===== WIRE / API TYPES =====
+export type ApiItem = Omit<Item, "id" | "reportedAt"> & {
+  id: string;
+  reportedAt: string;
+};
+
+export type NewItem = Omit<ApiItem, "id">;
+
+export type ApiClaim = Omit<Claim, "id" | "createdAt"> & {
+  id: string;
+  createdAt: string;
+};
+
+export type NewClaimApi = Omit<ApiClaim, "id">;

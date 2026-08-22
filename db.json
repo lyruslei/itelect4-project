@@ -1,0 +1,41 @@
+{
+  "items": [
+    {
+      "id": "101",
+      "title": "Black Backpack",
+      "description": "Left in the library, contains a laptop and notebooks.",
+      "location": "Main Library, 2nd Floor",
+      "status": "lost",
+      "reportedById": 2,
+      "reportedAt": "2026-07-28T00:00:00.000Z"
+    },
+    {
+      "id": "102",
+      "title": "Silver Water Bottle",
+      "description": "Hydro Flask found near the basketball court.",
+      "location": "Gymnasium",
+      "status": "found",
+      "reportedById": 1,
+      "reportedAt": "2026-07-30T00:00:00.000Z"
+    },
+    {
+      "id": "103",
+      "title": "Wireless Earbuds",
+      "description": "White charging case with left earbud missing.",
+      "location": "Science Building Room 302",
+      "status": "claimed",
+      "reportedById": 3,
+      "reportedAt": "2026-07-25T00:00:00.000Z"
+    }
+  ],
+  "claims": [
+    {
+      "id": "1",
+      "itemId": 101,
+      "claimantId": 1,
+      "status": 0,
+      "createdAt": "2026-07-29T00:00:00.000Z",
+      "notes": "I left it there yesterday afternoon."
+    }
+  ]
+}

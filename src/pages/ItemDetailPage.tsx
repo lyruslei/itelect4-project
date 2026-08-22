@@ -1,27 +1,52 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router";
-import { mockItemsData } from "../data/mockData";
+import { useQuery } from "@tanstack/react-query";
+import type { ApiItem } from "../types/index";
+import { fetchItemById } from "../api/client";
 
 function ItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const itemId = id ? parseInt(id, 10) : NaN;
-  const item = mockItemsData.find((item) => item.id === itemId);
+  const {
+    data: item,
+    isPending,
+    isError,
+    error,
+  } = useQuery<ApiItem>({
+    queryKey: ["items", id],
+    queryFn: () => fetchItemById(id!),
+    enabled: id !== undefined,
+  });
 
   const handleBackClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
     navigate("/");
   };
 
-  if (!item) {
+  if (isPending) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-md animate-pulse space-y-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+          <div className="h-6 w-3/4 rounded bg-gray-300 dark:bg-gray-700"></div>
+          <div className="h-4 w-1/2 rounded bg-gray-200 dark:bg-gray-700"></div>
+          <div className="h-4 w-5/6 rounded bg-gray-200 dark:bg-gray-700"></div>
+          <div className="pt-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+            Loading item details...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !item) {
     return (
       <div className="mx-auto max-w-lg rounded-xl border border-amber-200 bg-amber-50 p-6 text-center shadow-sm dark:border-amber-900/60 dark:bg-amber-950/40">
         <h2 className="text-xl font-bold text-amber-800 dark:text-amber-300">
           Item Not Found
         </h2>
         <p className="mt-2 text-sm text-amber-700 dark:text-amber-400">
-          No campus item exists with ID <code className="font-mono">{id}</code>.
+          {error?.message ?? `No campus item exists with ID ${id}.`}
         </p>
         <button
           onClick={handleBackClick}
@@ -80,7 +105,7 @@ function ItemDetailPage() {
           </p>
           <p>
             <strong className="font-bold text-gray-900 dark:text-white">Reported Date:</strong>{" "}
-            {item.reportedAt.toLocaleDateString()}
+            {new Date(item.reportedAt).toLocaleDateString()}
           </p>
         </div>
       </div>

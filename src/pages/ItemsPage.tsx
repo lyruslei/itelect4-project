@@ -1,35 +1,50 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Link } from "react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ItemCard from "../components/ItemCard";
-import type { Item } from "../types/index";
+import type { ApiItem, NewItem } from "../types/index";
 import { useToggle } from "../hooks/useToggle";
 import { usePrevious } from "../hooks/usePrevious";
-import { mockItemsData } from "../data/mockData";
+import useUiStore from "../store/uiStore";
+import { fetchItems, createItem } from "../api/client";
 
 function ItemsPage() {
-  const [items, setItems] = useState<Item[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+  const queryClient = useQueryClient();
+  const searchTerm = useUiStore((state) => state.searchTerm);
+  const setSearchTerm = useUiStore((state) => state.setSearchTerm);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [isCompactView, toggleCompactView] = useToggle(false);
   const previousSearchTerm = usePrevious<string>(searchTerm);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setItems(mockItemsData);
-      setIsLoading(false);
-    }, 500);
+  // Form state for creating a new item mutation
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
+  const [status, setStatus] = useState<"lost" | "found">("lost");
 
-    return () => clearTimeout(timer);
-  }, []);
+  // TanStack Query for items list
+  const {
+    data: items = [],
+    isPending,
+    isError,
+    error,
+  } = useQuery<ApiItem[]>({
+    queryKey: ["items"],
+    queryFn: fetchItems,
+  });
 
-  useEffect(() => {
-    if (!isLoading && !isError) {
-      searchInputRef.current?.focus();
-    }
-  }, [isLoading, isError]);
+  // TanStack Mutation for adding a new item
+  const addItemMutation = useMutation({
+    mutationFn: createItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["items"] });
+      setTitle("");
+      setDescription("");
+      setLocation("");
+      setStatus("lost");
+    },
+  });
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSearchTerm(e.target.value);
@@ -39,14 +54,23 @@ function ItemsPage() {
     searchInputRef.current?.focus();
   };
 
-  const filteredItems: Item[] = items.filter(
-    (item) =>
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    if (!title.trim() || !description.trim() || !location.trim()) return;
 
-  if (isLoading) {
+    const newItem: NewItem = {
+      title: title.trim(),
+      description: description.trim(),
+      location: location.trim(),
+      status,
+      reportedById: 1,
+      reportedAt: new Date().toISOString(),
+    };
+
+    addItemMutation.mutate(newItem);
+  };
+
+  if (isPending) {
     return (
       <div className="flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md animate-pulse space-y-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800">
@@ -66,17 +90,18 @@ function ItemsPage() {
       <div className="flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md rounded-xl border border-red-200 bg-red-50 p-6 text-center shadow-sm dark:border-red-900 dark:bg-red-950/80">
           <h3 className="text-lg font-bold text-red-700 dark:text-red-300">Could not load items</h3>
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">Please check your connection and try again.</p>
-          <button
-            onClick={() => setIsError(false)}
-            className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 cursor-pointer"
-          >
-            Retry Loading
-          </button>
+          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error.message}</p>
         </div>
       </div>
     );
   }
+
+  const filteredItems: ApiItem[] = items.filter(
+    (item) =>
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -98,15 +123,98 @@ function ItemsPage() {
           >
             {isCompactView ? "Normal Cards" : "Compact Cards"}
           </button>
-
-          <button
-            onClick={() => setIsError(true)}
-            className="rounded-lg bg-red-100 px-3.5 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-200 dark:bg-red-950/60 dark:text-red-300 dark:hover:bg-red-900/60 cursor-pointer"
-          >
-            Simulate Error
-          </button>
         </div>
       </div>
+
+      {/* Report New Item Form (useMutation) */}
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-800">
+        <h3 className="mb-3 text-lg font-bold text-gray-900 dark:text-white">
+          Report New Campus Item
+        </h3>
+        <form onSubmit={handleFormSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="item-title" className="mb-1 block text-xs font-bold text-gray-700 dark:text-gray-300">
+                Title
+              </label>
+              <input
+                id="item-title"
+                type="text"
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Blue Umbrella"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label htmlFor="item-location" className="mb-1 block text-xs font-bold text-gray-700 dark:text-gray-300">
+                Location
+              </label>
+              <input
+                id="item-location"
+                type="text"
+                required
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="e.g. Student Center Cafeteria"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="item-description" className="mb-1 block text-xs font-bold text-gray-700 dark:text-gray-300">
+              Description
+            </label>
+            <input
+              id="item-description"
+              type="text"
+              required
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="e.g. Automatic umbrella with wooden handle"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+            />
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Status:</label>
+              <label className="inline-flex items-center gap-1.5 text-xs text-gray-700 dark:text-gray-300">
+                <input
+                  type="radio"
+                  name="status"
+                  value="lost"
+                  checked={status === "lost"}
+                  onChange={() => setStatus("lost")}
+                />
+                Lost
+              </label>
+              <label className="inline-flex items-center gap-1.5 text-xs text-gray-700 dark:text-gray-300">
+                <input
+                  type="radio"
+                  name="status"
+                  value="found"
+                  checked={status === "found"}
+                  onChange={() => setStatus("found")}
+                />
+                Found
+              </label>
+            </div>
+            <button
+              type="submit"
+              disabled={addItemMutation.isPending}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+            >
+              {addItemMutation.isPending ? "Submitting..." : "Report Item"}
+            </button>
+          </div>
+          {addItemMutation.isError && (
+            <p className="text-xs text-red-600 dark:text-red-400">
+              Error submitting item: {addItemMutation.error.message}
+            </p>
+          )}
+        </form>
+      </section>
 
       {/* Search Input Section */}
       <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-800">
