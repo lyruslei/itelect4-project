@@ -1,12 +1,18 @@
-import React, { useState, useRef } from "react";
+import React, { useRef } from "react";
 import { Link } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import ItemCard from "../components/ItemCard";
 import type { ApiItem, NewItem } from "../types/index";
+import { itemSchema, type ItemFormValues } from "../schemas/itemSchema";
 import { useToggle } from "../hooks/useToggle";
 import { usePrevious } from "../hooks/usePrevious";
 import useUiStore from "../store/uiStore";
 import { fetchItems, createItem } from "../api/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function ItemsPage() {
   const queryClient = useQueryClient();
@@ -17,11 +23,22 @@ function ItemsPage() {
   const [isCompactView, toggleCompactView] = useToggle(false);
   const previousSearchTerm = usePrevious<string>(searchTerm);
 
-  // Form state for creating a new item mutation
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
-  const [status, setStatus] = useState<"lost" | "found">("lost");
+  // React Hook Form + Zod schema validation
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ItemFormValues>({
+    resolver: zodResolver(itemSchema),
+    mode: "onBlur",
+    defaultValues: {
+      title: "",
+      location: "",
+      description: "",
+      status: "lost",
+    },
+  });
 
   // TanStack Query for items list
   const {
@@ -39,10 +56,7 @@ function ItemsPage() {
     mutationFn: createItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
-      setTitle("");
-      setDescription("");
-      setLocation("");
-      setStatus("lost");
+      reset();
     },
   });
 
@@ -54,15 +68,12 @@ function ItemsPage() {
     searchInputRef.current?.focus();
   };
 
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-    if (!title.trim() || !description.trim() || !location.trim()) return;
-
+  const onSubmit = (values: ItemFormValues): void => {
     const newItem: NewItem = {
-      title: title.trim(),
-      description: description.trim(),
-      location: location.trim(),
-      status,
+      title: values.title.trim(),
+      description: values.description.trim(),
+      location: values.location.trim(),
+      status: values.status,
       reportedById: 1,
       reportedAt: new Date().toISOString(),
     };
@@ -117,96 +128,94 @@ function ItemsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          <Button
             onClick={toggleCompactView}
-            className="rounded-lg bg-gray-200 px-3.5 py-2 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 cursor-pointer"
+            variant="outline"
+            className="cursor-pointer"
           >
             {isCompactView ? "Normal Cards" : "Compact Cards"}
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* Report New Item Form (useMutation) */}
+      {/* Report New Item Form (React Hook Form + Zod + Shadcn UI) */}
       <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-800">
         <h3 className="mb-3 text-lg font-bold text-gray-900 dark:text-white">
           Report New Campus Item
         </h3>
-        <form onSubmit={handleFormSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="item-title" className="mb-1 block text-xs font-bold text-gray-700 dark:text-gray-300">
+              <Label htmlFor="item-title" className="mb-1 block text-foreground">
                 Title
-              </label>
-              <input
+              </Label>
+              <Input
                 id="item-title"
                 type="text"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Blue Umbrella"
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                aria-invalid={errors.title ? true : undefined}
+                {...register("title")}
               />
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+              )}
             </div>
             <div>
-              <label htmlFor="item-location" className="mb-1 block text-xs font-bold text-gray-700 dark:text-gray-300">
+              <Label htmlFor="item-location" className="mb-1 block text-foreground">
                 Location
-              </label>
-              <input
+              </Label>
+              <Input
                 id="item-location"
                 type="text"
-                required
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g. Student Center Cafeteria"
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                aria-invalid={errors.location ? true : undefined}
+                {...register("location")}
               />
+              {errors.location && (
+                <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>
+              )}
             </div>
           </div>
           <div>
-            <label htmlFor="item-description" className="mb-1 block text-xs font-bold text-gray-700 dark:text-gray-300">
+            <Label htmlFor="item-description" className="mb-1 block text-foreground">
               Description
-            </label>
-            <input
+            </Label>
+            <Input
               id="item-description"
               type="text"
-              required
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g. Automatic umbrella with wooden handle"
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+              aria-invalid={errors.description ? true : undefined}
+              {...register("description")}
             />
+            {errors.description && (
+              <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+            )}
           </div>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <label className="text-xs font-bold text-gray-700 dark:text-gray-300">Status:</label>
-              <label className="inline-flex items-center gap-1.5 text-xs text-gray-700 dark:text-gray-300">
-                <input
-                  type="radio"
-                  name="status"
-                  value="lost"
-                  checked={status === "lost"}
-                  onChange={() => setStatus("lost")}
-                />
-                Lost
-              </label>
-              <label className="inline-flex items-center gap-1.5 text-xs text-gray-700 dark:text-gray-300">
-                <input
-                  type="radio"
-                  name="status"
-                  value="found"
-                  checked={status === "found"}
-                  onChange={() => setStatus("found")}
-                />
-                Found
-              </label>
+              <Label htmlFor="item-status" className="text-foreground">
+                Status:
+              </Label>
+              <select
+                id="item-status"
+                {...register("status")}
+                aria-invalid={errors.status ? true : undefined}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+              >
+                <option value="lost">Lost</option>
+                <option value="found">Found</option>
+              </select>
+              {errors.status && (
+                <p className="text-sm text-red-600">{errors.status.message}</p>
+              )}
             </div>
-            <button
+            <Button
               type="submit"
               disabled={addItemMutation.isPending}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+              className="cursor-pointer"
             >
               {addItemMutation.isPending ? "Submitting..." : "Report Item"}
-            </button>
+            </Button>
           </div>
           {addItemMutation.isError && (
             <p className="text-xs text-red-600 dark:text-red-400">
@@ -218,25 +227,25 @@ function ItemsPage() {
 
       {/* Search Input Section */}
       <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-800">
-        <label htmlFor="search-input" className="mb-2 block text-sm font-bold text-gray-700 dark:text-gray-300">
+        <Label htmlFor="search-input" className="mb-2 block text-foreground font-bold">
           Search Items
-        </label>
+        </Label>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <input
+          <Input
             id="search-input"
             ref={searchInputRef}
             type="text"
             placeholder="Search by title, description, or location..."
             value={searchTerm}
             onChange={handleSearchChange}
-            className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400"
+            className="flex-1"
           />
-          <button
+          <Button
             onClick={handleFocusClick}
-            className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 cursor-pointer"
+            className="cursor-pointer"
           >
             Focus Search
-          </button>
+          </Button>
         </div>
         {previousSearchTerm !== undefined && (
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
