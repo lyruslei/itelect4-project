@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import useAuthStore from "../store/authStore";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function LoginPage() {
   const [name, setName] = useState<string>("");
@@ -26,29 +29,28 @@ function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label
+            <Label
               htmlFor="username-input"
-              className="mb-1 block text-sm font-bold text-gray-700 dark:text-gray-300"
+              className="mb-1 block text-foreground"
             >
               Your Name
-            </label>
-            <input
+            </Label>
+            <Input
               id="username-input"
               type="text"
               required
               placeholder="e.g. Juan dela Cruz"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:focus:border-blue-400"
             />
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 cursor-pointer"
+            className="w-full cursor-pointer"
           >
             Log In
-          </button>
+          </Button>
         </form>
       </div>
     </div>

@@ -26,6 +26,15 @@
       "status": "claimed",
       "reportedById": 3,
       "reportedAt": "2026-07-25T00:00:00.000Z"
+    },
+    {
+      "title": "Jacket",
+      "description": "Grey and Big",
+      "location": "CBEAM",
+      "status": "lost",
+      "reportedById": 1,
+      "reportedAt": "2026-08-19T14:21:48.835Z",
+      "id": "r-FPbCB1Br0"
     }
   ],
   "claims": [
@@ -37,5 +46,6 @@
       "createdAt": "2026-07-29T00:00:00.000Z",
       "notes": "I left it there yesterday afternoon."
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }
