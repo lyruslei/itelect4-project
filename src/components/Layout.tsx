@@ -73,18 +73,32 @@ function Layout() {
                     Logout ({userName})
                   </button>
                 ) : (
-                  <NavLink
-                    to="/login"
-                    className={({ isActive }) =>
-                      `px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
-                        isActive
-                          ? "bg-blue-600 text-white dark:bg-blue-600 dark:text-white"
-                          : "text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800"
-                      }`
-                    }
-                  >
-                    Login
-                  </NavLink>
+                  <>
+                    <NavLink
+                      to="/login"
+                      className={({ isActive }) =>
+                        `px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
+                          isActive
+                            ? "bg-blue-600 text-white dark:bg-blue-600 dark:text-white"
+                            : "text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800"
+                        }`
+                      }
+                    >
+                      Login
+                    </NavLink>
+                    <NavLink
+                      to="/register"
+                      className={({ isActive }) =>
+                        `px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
+                          isActive
+                            ? "bg-blue-600 text-white dark:bg-blue-600 dark:text-white"
+                            : "text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800"
+                        }`
+                      }
+                    >
+                      Register
+                    </NavLink>
+                  </>
                 )}
               </nav>
 
