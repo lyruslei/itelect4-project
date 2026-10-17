@@ -9,7 +9,7 @@ import { itemSchema, type ItemFormValues } from "../schemas/itemSchema";
 import { useToggle } from "../hooks/useToggle";
 import { usePrevious } from "../hooks/usePrevious";
 import useUiStore from "../store/uiStore";
-import { fetchItems, createItem } from "../api/client";
+import { fetchItems, createItem, API_URL } from "../api/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,16 +69,18 @@ function ItemsPage() {
   };
 
   const onSubmit = (values: ItemFormValues): void => {
-    const newItem: NewItem = {
-      title: values.title.trim(),
-      description: values.description.trim(),
-      location: values.location.trim(),
-      status: values.status,
-      reportedById: 1,
-      reportedAt: new Date().toISOString(),
-    };
-
-    addItemMutation.mutate(newItem);
+    // SESSIONS 7-8:
+    // const newItem: NewItem = {
+    //   title: values.title.trim(),
+    //   description: values.description.trim(),
+    //   location: values.location.trim(),
+    //   status: values.status,
+    //   reportedById: 1,
+    //   reportedAt: new Date().toISOString(),
+    // };
+    // addItemMutation.mutate(newItem);
+    // NOTE: The server takes the owner from the token and defaults the date. Send only form values.
+    addItemMutation.mutate(values);
   };
 
   if (isPending) {
@@ -101,7 +103,9 @@ function ItemsPage() {
       <div className="flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md rounded-xl border border-red-200 bg-red-50 p-6 text-center shadow-sm dark:border-red-900 dark:bg-red-950/80">
           <h3 className="text-lg font-bold text-red-700 dark:text-red-300">Could not load items</h3>
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error.message}</p>
+          <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+            {error.message} — tried {API_URL}/api/items
+          </p>
         </div>
       </div>
     );

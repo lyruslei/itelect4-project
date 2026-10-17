@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import ClaimBadge from "../components/ClaimBadge";
 import type { ApiClaim } from "../types/index";
-import { fetchClaims } from "../api/client";
+import { fetchClaims, API_URL } from "../api/client";
 import { useToggle } from "../hooks/useToggle";
 
 function ClaimsPage() {
@@ -37,7 +37,9 @@ function ClaimsPage() {
       <div className="flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md rounded-xl border border-red-200 bg-red-50 p-6 text-center shadow-sm dark:border-red-900 dark:bg-red-950/80">
           <h3 className="text-lg font-bold text-red-700 dark:text-red-300">Could not load claims</h3>
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error.message}</p>
+          <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+            {error.message} — tried {API_URL}/api/claims
+          </p>
         </div>
       </div>
     );

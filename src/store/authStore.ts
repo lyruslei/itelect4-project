@@ -4,18 +4,16 @@ import { persist } from "zustand/middleware";
 interface AuthState {
   token: string | null;
   userName: string | null;
-  login: (name: string) => void;
+  setSession: (token: string, userName: string) => void;
   logout: () => void;
 }
 
-// NOTE: In a production application, sensitive auth tokens or JWTs should be stored in secure httpOnly cookies
-// rather than localStorage to protect against XSS vulnerabilities. Demo tokens are persisted here for demonstration purposes.
 const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       token: null,
       userName: null,
-      login: (name) => set({ token: `demo-token-${name}`, userName: name }),
+      setSession: (token, userName) => set({ token, userName }),
       logout: () => set({ token: null, userName: null }),
     }),
     {

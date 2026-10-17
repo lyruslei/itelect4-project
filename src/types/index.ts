@@ -68,16 +68,33 @@ export function createClaim(itemId: number, claimantId: number, notes?: string) 
 export type NewClaim = ReturnType<typeof createClaim>;
 
 // ===== WIRE / API TYPES =====
-export type ApiItem = Omit<Item, "id" | "reportedAt"> & {
-  id: string;
-  reportedAt: string;
+/*
+ * SESSIONS 7-8: Old wire types for json-server mock API.
+ * export type ApiItem = Omit<Item, "id" | "reportedAt"> & {
+ *   id: string;
+ *   reportedAt: string;
+ * };
+ * export type NewItem = Omit<ApiItem, "id">;
+ * export type NewClaimApi = Omit<ApiClaim, "id">;
+ */
+
+export type ApiItem = Omit<Item, "id" | "reportedById" | "reportedAt"> & {
+  id: string;           // 24 hex chars from MongoDB _id
+  reportedById: string; // owner's _id
+  reportedAt: string;   // ISO string, never a Date
 };
 
-export type NewItem = Omit<ApiItem, "id">;
+// What we SEND: no id, NO reportedById, NO reportedAt. The server takes the owner from the token and defaults the date.
+export type NewItem = Pick<Item, "title" | "description" | "location" | "status">;
 
 export type ApiClaim = Omit<Claim, "id" | "createdAt"> & {
-  id: string;
-  createdAt: string;
+  id: string;           // 24 hex chars from MongoDB _id
+  createdAt: string;    // ISO string, never a Date
 };
 
-export type NewClaimApi = Omit<ApiClaim, "id">;
+export type ApiUser = Omit<User, "id"> & { id: string };
+
+export interface AuthReply {
+  token: string;
+  user: ApiUser;
+}
