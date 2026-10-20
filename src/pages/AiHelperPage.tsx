@@ -102,21 +102,21 @@ function AiHelperPage() {
 
           <p className="text-gray-900 dark:text-white">{advice.data.summary}</p>
 
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">Add these details</h3>
-            {/* Empty when the report is complete: say so instead of an empty list. */}
-            {advice.data.missingDetails.length === 0 ? (
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                Nothing to add: someone could recognise the item from this report.
-              </p>
-            ) : (
+          {/* Empty when the report is complete: no heading, just say so. */}
+          {advice.data.missingDetails.length === 0 ? (
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Nothing to add: someone could recognise the item from this report.
+            </p>
+          ) : (
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Add these details</h3>
               <ul className="list-disc pl-5 text-sm text-gray-700 dark:text-gray-300">
                 {advice.data.missingDetails.map((detail) => (
                   <li key={detail}>{detail}</li>
                 ))}
               </ul>
-            )}
-          </div>
+            </div>
+          )}
         </section>
       )}
     </div>
