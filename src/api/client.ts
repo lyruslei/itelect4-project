@@ -1,4 +1,4 @@
-import type { ApiItem, NewItem, ApiClaim, AuthReply, ApiUser } from "../types/index";
+import type { ApiItem, NewItem, ApiClaim, AuthReply, ApiUser, ApiItemAdvice } from "../types/index";
 import useAuthStore from "../store/authStore";
 
 /*
@@ -80,5 +80,15 @@ export async function loginUser(credentials: {
   return request<AuthReply>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify(credentials),
+  });
+}
+
+// ===== SESSION 11: AI REPORT HELPER (PRIVATE) =====
+// The token goes on automatically through request(). No Gemini key or
+// address here: the browser only ever talks to our own API.
+export async function askAi(prompt: string): Promise<ApiItemAdvice> {
+  return request<ApiItemAdvice>("/api/ai", {
+    method: "POST",
+    body: JSON.stringify({ prompt }),
   });
 }

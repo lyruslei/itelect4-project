@@ -98,3 +98,14 @@ export interface AuthReply {
   token: string;
   user: ApiUser;
 }
+
+// ===== SESSION 11: what POST /api/ai sends back =====
+// Copied by hand from itelect4-backend's itemAdviceSchema in
+// src/schemas/itemAdvice.ts. Nothing checks that they agree -- we do.
+export interface ApiItemAdvice {
+  suggestedTitle: string;
+  summary: string;
+  category: "electronics" | "id-card" | "clothing" | "bag" | "keys" | "other";
+  missingDetails: string[];
+  quality: "complete" | "needs-detail" | "too-vague";
+}

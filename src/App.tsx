@@ -8,6 +8,7 @@ import ClaimsPage from "./pages/ClaimsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import AiHelperPage from "./pages/AiHelperPage";
 
 function App() {
   return (
@@ -26,6 +27,8 @@ function App() {
           <Route path="items" element={<ItemsPage />} />
           <Route path="items/:id" element={<ItemDetailPage />} />
           <Route path="submissions" element={<Navigate to="/items" replace />} />
+          {/* Session 11: behind the same guard -- the API refuses it without a token anyway */}
+          <Route path="ai-helper" element={<AiHelperPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
