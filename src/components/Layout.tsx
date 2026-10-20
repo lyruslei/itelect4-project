@@ -64,6 +64,19 @@ function Layout() {
                 >
                   Claims
                 </NavLink>
+                {/* Session 11: the one page that talks to Gemini (through our API) */}
+                <NavLink
+                  to="/ai-helper"
+                  className={({ isActive }) =>
+                    `px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
+                      isActive
+                        ? "bg-blue-600 text-white dark:bg-blue-600 dark:text-white"
+                        : "text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800"
+                    }`
+                  }
+                >
+                  AI Helper
+                </NavLink>
 
                 {token ? (
                   <button
