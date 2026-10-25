@@ -1,75 +1,54 @@
-# React + TypeScript + Vite
+# itelect4-project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![CI](https://github.com/lyruslei/itelect4-project/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/lyruslei/itelect4-project/actions/workflows/ci.yml)
 
-Currently, two official plugins are available:
+**Campus Lost & Found Tracker**, the frontend: React 19 + TypeScript on Vite, with TanStack Query, React Hook Form + Zod and shadcn/ui. Students register, log in, report items they lost or found (private to their account), browse public claims, and use an AI Report Helper that checks whether an item description has enough detail.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Live site:** https://itelect4-project-delta.vercel.app
+- **Live API:** https://itelect4-backend-mu.vercel.app/api/health
+- **Backend repo:** https://github.com/lyruslei/itelect4-backend
 
-## React Compiler
+## Architecture
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```mermaid
+flowchart LR
+  fe["itelect4-project<br/>React + Vite on Vercel"]
+  be["itelect4-backend<br/>Express on Vercel"]
+  db[("MongoDB Atlas")]
+  ai["Gemini API"]
+  fe -- "fetch + Bearer token" --> be
+  be -- "Mongoose" --> db
+  be -- "GEMINI_API_KEY" --> ai
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Run it locally
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Needs Node 22.12 or newer (Node 24 recommended).
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+cp .env.example .env    # set VITE_API_URL, e.g. http://localhost:4000 (no /api, no trailing slash)
+npm run dev             # http://localhost:5173
 ```
+
+The backend has to be running too. See the backend repo's README.
+
+## Tests
+
+```bash
+npm test                # Vitest, once
+npm run test:watch      # Vitest, re-runs on save
+```
+
+Three test files, each beside the file it tests:
+
+- `src/components/ClaimBadge.test.tsx`: a component render (status text, and the "No notes provided" fallback)
+- `src/hooks/useToggle.test.ts`: a custom hook's state
+- `src/pages/AiHelperPage.test.tsx`: form validation; a too-short description shows the schema's message and sends no request
+
+GitHub Actions (`.github/workflows/ci.yml`) runs `npm ci`, `npm test` and `npm run build` on every push.
+
+## AI-use disclosure
+
+- **In the app:** the AI Report Helper page sends item descriptions to Google Gemini, through the backend's `POST /api/ai`. The browser never sees the Gemini key.
+- **In development:** I used Claude Code (Anthropic) as a coding assistant to plan and write parts of this project, including the Session 11 AI helper and the Session 12 tests and CI. I reviewed, ran and verified every change, and I can explain each part.
